@@ -10,7 +10,9 @@ import java.net.Socket;
 /**
  * Web Server TP
  *
- * Treat multiple HTTP requests
+ * Treat different HTTP requests. This version includes support for GET, POST, PUT, HEAD, DELETE requests
+ * and offers support for multiple file formats, including ico, png, jpg, mp3, mp4, avi and others
+ * This server is also capable of detecting different types of errors.
  *
  * @author Stefan Ristovski Aydin Akaydin
  * @version 1.0
@@ -29,7 +31,7 @@ public class WebServer {
             // create the main server socket
             s = new ServerSocket(3000);
         } catch (Exception e) {
-            System.out.println("Error: " + e);
+            System.err.println("Error: " + e);
             return;
         }
 
@@ -108,14 +110,14 @@ public class WebServer {
                 remote.close();
 
             } catch (Exception e) {
-                System.out.println("Error: " + e);
+                System.err.println("Error: " + e);
                 try {
                     out.write(createHeader("500 Internal Server Error in START").getBytes());
                     out.flush();
-                } catch (Exception e2) { System.out.println(e2); };
+                } catch (Exception e2) { System.err.println(e2); };
                 try {
                     remote.close();
-                } catch (Exception e2) { System.out.println(e2); }
+                } catch (Exception e2) { System.err.println(e2); }
             }
         }
     }
@@ -138,6 +140,7 @@ public class WebServer {
                 resource = new File("files/notfound.html");
                 out.write(createHeader("404 Not Found", "files/notfound.html", resource.length()).getBytes());
             }
+
             BufferedInputStream fileRead = new BufferedInputStream(new FileInputStream(resource));
             byte[] buffer = new byte[256];
             int nbRead;
@@ -147,11 +150,11 @@ public class WebServer {
             fileRead.close();
             out.flush();
         } catch (IOException e) {
-            System.out.println("Error: " + e);
+            System.err.println("Error: " + e);
             try {
                 out.write(createHeader("500 Internal Server Error in HTTP GET").getBytes());
                 out.flush();
-            } catch (Exception e2) { System.out.println(e2); };
+            } catch (Exception e2) { System.err.println(e2); };
         }
     }
 
@@ -166,30 +169,32 @@ public class WebServer {
         System.out.println("Called POST " + fileName);
         try {
             File resource = new File(fileName);
-            boolean doesExist = resource.exists();
 
-            BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(resource, doesExist));
+            if(resource.exists())
+            {
+                out.write(createHeader("200 OK").getBytes());
+            } else {
+                out.write(createHeader("201 Created").getBytes());
+                resource.createNewFile();
+            }
+
+            BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(resource, resource.exists()));
 
             byte[] buffer = new byte[256];
             while(in.available() > 0) {
                 int nbRead = in.read(buffer);
                 fileOut.write(buffer, 0, nbRead);
             }
+
             fileOut.flush();
             fileOut.close();
-
-            if(doesExist) {
-                out.write(createHeader("200 OK").getBytes());
-            } else {
-                out.write(createHeader("201 Created").getBytes());
-            }
             out.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e);
             try {
                 out.write(createHeader("500 Internal Server Error").getBytes());
                 out.flush();
-            } catch (Exception e2) { System.out.println(e2); };
+            } catch (Exception e2) { System.err.println(e2); };
         }
     }
 
@@ -211,11 +216,11 @@ public class WebServer {
             }
             out.flush();
         } catch (IOException e) {
-            System.out.println("Error: " + e);
+            System.err.println("Error: " + e);
             try {
                 out.write(createHeader("500 Internal Server Error").getBytes());
                 out.flush();
-            } catch (Exception e2) { System.out.println(e2); };
+            } catch (Exception e2) { System.err.println(e2); };
         }
     }
 
@@ -230,11 +235,14 @@ public class WebServer {
         System.out.println("Called PUT " + fileName);
         try {
             File resource = new File(fileName);
-            boolean doesExist = resource.exists();
 
-            //DO WE NEED THIS?
-            PrintWriter pw = new PrintWriter(resource);
-            pw.close();
+            if (resource.exists())
+            {
+                out.write(createHeader("204 No Content").getBytes());
+            } else {
+                out.write(createHeader("201 Created").getBytes());
+                resource.createNewFile();
+            }
 
             BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(resource));
             byte[] buffer = new byte[256];
@@ -243,21 +251,17 @@ public class WebServer {
                 int nbRead = in.read(buffer);
                 fileOut.write(buffer, 0, nbRead);
             }
+
             fileOut.flush();
             fileOut.close();
 
-            if(doesExist) {
-                out.write(createHeader("204 No Content").getBytes());
-            } else {
-                out.write(createHeader("201 Created").getBytes());
-            }
             out.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e);
             try {
                 out.write(createHeader("500 Internal Server Error").getBytes());
                 out.flush();
-            } catch (Exception e2) { System.out.println(e2); };
+            } catch (Exception e2) { System.err.println(e2); };
         }
     }
 
@@ -273,24 +277,28 @@ public class WebServer {
             File resource = new File(fileName);
             boolean isDeleted = false;
             boolean doesExist = false;
-            if((doesExist = resource.exists()) && resource.isFile()) {
-                isDeleted = resource.delete();
+
+            if (resource.exists())
+            {
+                if (resource.isFile())
+                {
+                    if( resource.delete() ) {
+                        out.write(createHeader("204 No Content").getBytes());
+                    }
+                } else {
+                    out.write(createHeader("403 Forbidden").getBytes());
+                }
+            } else {
+                out.write(createHeader("404 Not Found").getBytes());
             }
 
-            if(isDeleted) {
-                out.write(createHeader("204 No Content").getBytes());
-            } else if (!doesExist) {
-                out.write(createHeader("404 Not Found").getBytes());
-            } else {
-                out.write(createHeader("403 Forbidden").getBytes());
-            }
             out.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e);
             try {
                 out.write(createHeader("500 Internal Server Error").getBytes());
                 out.flush();
-            } catch (Exception e2) { System.out.println(e2); };
+            } catch (Exception e2) { System.err.println(e2); };
         }
     }
 
@@ -300,7 +308,7 @@ public class WebServer {
      * @return Reponse
      */
     protected String createHeader(String status) {
-        String header = "HTTP/1.0 " + status + "\r\n" + "Server: Bot\r\n" + "\r\n";
+        String header = "HTTP/1.0 " + status + "\r\nServer: Bot\r\n\r\n";
         System.out.println("Response header :");
         System.out.println(header);
         return header;
@@ -334,7 +342,7 @@ public class WebServer {
         else if(filename.endsWith(".pdf"))
             header += "Content-Type: application/pdf\r\n";
 
-        header += "Content-Length: " + length + "\r\n" + "Server: Bot\r\n" + "\r\n";
+        header += "Content-Length: " + length + "\r\nServer: Bot\r\n\r\n";
 
         System.out.println("Response header :");
         System.out.println(header);
