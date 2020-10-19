@@ -60,6 +60,7 @@ public class WebServer {
                 boolean isNewLine = false;
 
                 currentByte = in.read();
+                //detect the end of request (either -1 for error, or two blank lines)
                 while(currentByte != -1 && !(prevByte == '\r' && currentByte == '\n' && isNewLine)) {
                     if(prevByte == '\r' && currentByte == '\n') {
                         isNewLine = true;
@@ -112,7 +113,7 @@ public class WebServer {
             } catch (Exception e) {
                 System.err.println("Error: " + e);
                 try {
-                    out.write(createHeader("500 Internal Server Error in START").getBytes());
+                    out.write(createHeader("500 Internal Server Error").getBytes());
                     out.flush();
                 } catch (Exception e2) { System.err.println(e2); };
                 try {
@@ -152,7 +153,7 @@ public class WebServer {
         } catch (IOException e) {
             System.err.println("Error: " + e);
             try {
-                out.write(createHeader("500 Internal Server Error in HTTP GET").getBytes());
+                out.write(createHeader("500 Internal Server Error").getBytes());
                 out.flush();
             } catch (Exception e2) { System.err.println(e2); };
         }
@@ -275,8 +276,6 @@ public class WebServer {
         System.out.println("Called DELETE " + fileName);
         try {
             File resource = new File(fileName);
-            boolean isDeleted = false;
-            boolean doesExist = false;
 
             if (resource.exists())
             {
