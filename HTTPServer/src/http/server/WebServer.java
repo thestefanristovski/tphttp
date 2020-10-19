@@ -22,14 +22,14 @@ public class WebServer {
     /**
      * WebServer constructor.
      */
-    protected void start() {
+    protected void start(int port) {
         ServerSocket s;
 
-        System.out.println("Webserver starting up on port 3000");
+        System.out.println("Webserver starting up on port " + port);
         System.out.println("(press ctrl-c to exit)");
         try {
             // create the main server socket
-            s = new ServerSocket(3000);
+            s = new ServerSocket(port);
         } catch (Exception e) {
             System.err.println("Error: " + e);
             return;
@@ -354,10 +354,16 @@ public class WebServer {
      * Start the application.
      *
      * @param args
-     *            Command line parameters are not used.
+     *            Only one argument, the port of the web server.
      */
     public static void main(String args[]) {
+
+        if (args.length != 1) {
+            System.out.println("Error in arguments! When compiling, please use: java WebServer <WebServer port>");
+            System.exit(1);
+        }
+
         WebServer ws = new WebServer();
-        ws.start();
+        ws.start(Integer.parseInt(args[0]));
     }
 }

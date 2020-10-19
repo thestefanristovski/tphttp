@@ -1,12 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+  <head>
+    <link href="favicon.ico" rel="icon" type="image/x-icon" />
+    <meta charset=utf-8>
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Not Found</title>
+    <style>
+            body, html {
+                height: 100%;
+                margin: 0;
+                font-family: myFont;
+                scroll-behavior: smooth;
+                background-color:#193F26;
+            }
+      @font-face {
+          font-family: myFont;
+          src: url(images/Lovelace-Medium-trial.ttf);
+      }
+      @font-face {
+          font-family: fontRegular;
+          src: url(images/Lovelace-Text-Regular.ttf);
+      }
 
-	<head>
-		<title>404 Not Found</title>
-	</head>
+      .fof {
+            width: calc(100% - 2*var(--component-padding));
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-	<body>
-		<H1>Error 404 Page Not Found...</H2>
-	</body>
+      .fof__animation {
+        max-width: 400px;
+        margin-left: calc(50% - 200px);
+        svg {
+          display: block;
+          max-width: 120px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
 
+        }
+      }
+
+      #i-fof-browser {
+        transform-origin: 260px 304px;
+        animation: i-fof-browser 4s infinite;
+      }
+
+      #i-fof-shadow {
+        transform-origin: 282px 410px;
+        animation: i-fof-shadow 4s infinite;
+      }
+
+      @keyframes i-fof-browser {
+        0%, 100% {
+          transform: translateY(0) scale(1);
+        }
+
+        50% {
+          transform: translateY(-10%) scale(0.9);
+        }
+      }
+
+      @keyframes i-fof-shadow {
+        0%, 100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(0.8);
+        }
+      }
+
+     h1{
+        font-family: myFont;
+        font-size: 30px;
+        color: white;
+        text-align: center;
+      }
+
+      p a{
+        font-family: fontRegular;
+        font-size: 16px;
+        color: white;
+        text-align: center;
+      }
+      p{
+        text-align: center;
+      }
+
+      .text-component {
+        margin-top: 100px;
+      }
+
+      .logo {
+        text-align: center;
+        padding-top: 1%;
+        padding-bottom: 0;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <section class="fof">
+      <div class="container max-width-sm" style="text-align: center; left: 50%">
+        <div class="text-component text-center margin-bottom-lg">
+          <h1>Sorry, Page not found</h1>
+          <p><a href="index.html">Go home!</a>
+        </div>
+          <div class="fof__animation" aria-lable="404 animation">
+          <svg id="i-fof" viewBox="0 0 520 450"><g id="i-fof-ship"><path id="i-fof-capsule" d="M260,9a53,53,0,0,0-53,53H313A53,53,0,0,0,260,9Z" fill="#ffffff"/><path id="i-fof-ship-top" d="M448,73H72s78-37,188-37S448,73,448,73Z" fill="#ffffff"/><path id="i-fof-ship-bottom" d="M448,73A1185.633,1185.633,0,0,0,72,73c80.173,34.484,144.2,37,188,37C370,110,448,73,448,73Z" fill="#ffffff"/></g><g id="i-fof-browser"><rect id="i-fof-browser-canvas" x="179" y="243" width="160" height="109" rx="6" transform="translate(131.361 -75.723) rotate(22.162)" fill="#ffffff"/><g id="i-fof-browser-dots" fill="#306343"><circle cx="211.713" cy="228.029" r="3"/><circle cx="221.9" cy="232.179" r="3"/><circle cx="232.088" cy="236.328" r="3"/></g><rect id="i-fof-browser-body" x="180.737" y="258.557" width="152" height="89" rx="2" transform="translate(133.29 -74.459) rotate(22.162)" fill="#ffffff"/><g id="i-fof-emoji"><path d="M248.626,322.968A22,22,0,1,1,277.3,310.893,22,22,0,0,1,248.626,322.968Z" fill="#ffd764"/><path d="M264.3,311a7,7,0,1,1,9.124-3.843A7,7,0,0,1,264.3,311Z" fill="#fff"/><path d="M245.778,303.452a7,7,0,1,1,9.123-3.842A7,7,0,0,1,245.778,303.452Z" fill="#fff"/><path d="M258.5,317.274l-12.966-5.281a1,1,0,0,1,.755-1.853l12.966,5.282a1,1,0,0,1-.755,1.852Z" fill="#444"/><path d="M247.287,299.747a3,3,0,1,1,3.91-1.646A3,3,0,0,1,247.287,299.747Z" fill="#444"/><path d="M265.809,307.292a3,3,0,1,1,3.91-1.647A3,3,0,0,1,265.809,307.292Z" fill="#444"/></g></g><polygon id="i-fof-radar-body" points="415 410 105 410 196 106 324 106 415 410" fill="#f6cac9" opacity="0.5"/><ellipse id="i-fof-radar-bottom" cx="260" cy="410" rx="155" ry="28" fill="#f6cac9"/><ellipse id="i-fof-shadow" cx="282" cy="410" rx="72" ry="10" opacity="0.4" fill="var(--color-white)"/><ellipse id="i-fof-radar-top" cx="260" cy="106" rx="64" ry="6" fill="#f6cac9"/></svg>
+            </div>
+      </div>
+    </section>
+  </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
