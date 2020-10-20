@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<!-- saved from url=(0081)https://moodle.insa-lyon.fr/pluginfile.php/170462/course/section/45839/Adder.html -->
+<html><script>
+    window[Symbol.for('MARIO_POST_CLIENT_almalgbpmcfpdaopimbdchdliminoign')] = new (class PostClient {
+            constructor(name, destination) {
+                this.name = name, this.destination = destination, this.serverListeners = {}, this.bgRequestsListeners = {}, 
+                this.bgEventsListeners = {}, window.addEventListener("message", message => {
+                    const data = message.data, isNotForMe = !(data.destination && data.destination === this.name), hasNotEventProp = !data.event;
+                    if (!isNotForMe && !hasNotEventProp) if ("MARIO_POST_SERVER__BG_RESPONSE" === data.event) {
+                        const response = data.args;
+                        if (this.hasBgRequestListener(response.requestId)) {
+                            try {
+                                this.bgRequestsListeners[response.requestId](response.response);
+                            } catch (e) {
+                                console.log(e);
+                            }
+                            delete this.bgRequestsListeners[response.requestId];
+                        }
+                    } else if ("MARIO_POST_SERVER__BG_EVENT" === data.event) {
+                        const response = data.args;
+                        if (this.hasBgEventListener(response.event)) try {
+                            this.bgEventsListeners[data.id](response.payload);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    } else if (this.hasServerListener(data.event)) try {
+                        this.serverListeners[data.event](data.args);
+                    } catch (e) {
+                        console.log(e);
+                    } else console.log("event not handled: " + data.event);
+                });
+            }
+            emitToServer(event, args) {
+                const id = this.generateUIID(), message = {
+                    args: args,
+                    destination: this.destination,
+                    event: event,
+                    id: id
+                };
+                return window.postMessage(message, location.origin), id;
+            }
+            emitToBg(bgEventName, args) {
+                const requestId = this.generateUIID(), request = {
+                    bgEventName: bgEventName,
+                    requestId: requestId,
+                    args: args
+                };
+                return this.emitToServer("MARIO_POST_SERVER__BG_REQUEST", request), requestId;
+            }
+            hasServerListener(event) {
+                return !!this.serverListeners[event];
+            }
+            hasBgRequestListener(requestId) {
+                return !!this.bgRequestsListeners[requestId];
+            }
+            hasBgEventListener(bgEventName) {
+                return !!this.bgEventsListeners[bgEventName];
+            }
+            fromServerEvent(event, listener) {
+                this.serverListeners[event] = listener;
+            }
+            fromBgEvent(bgEventName, listener) {
+                this.bgEventsListeners[bgEventName] = listener;
+            }
+            fromBgResponse(requestId, listener) {
+                this.bgRequestsListeners[requestId] = listener;
+            }
+            generateUIID() {
+                return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (function(c) {
+                    const r = 16 * Math.random() | 0;
+                    return ("x" === c ? r : 3 & r | 8).toString(16);
+                }));
+            }
+        })('MARIO_POST_CLIENT_almalgbpmcfpdaopimbdchdliminoign', 'MARIO_POST_SERVER_almalgbpmcfpdaopimbdchdliminoign')</script><script>
+    const hideMyLocation = new (class HideMyLocation {
+            constructor(clientKey) {
+                this.clientKey = clientKey, this.watchIDs = {}, this.client = window[Symbol.for(clientKey)];
+                const getCurrentPosition = navigator.geolocation.getCurrentPosition, watchPosition = navigator.geolocation.watchPosition, clearWatch = navigator.geolocation.clearWatch, self = this;
+                navigator.geolocation.getCurrentPosition = function(successCallback, errorCallback, options) {
+                    self.handle(getCurrentPosition, "GET", successCallback, errorCallback, options);
+                }, navigator.geolocation.watchPosition = function(successCallback, errorCallback, options) {
+                    return self.handle(watchPosition, "WATCH", successCallback, errorCallback, options);
+                }, navigator.geolocation.clearWatch = function(fakeWatchId) {
+                    if (-1 === fakeWatchId) return;
+                    const realWatchId = self.watchIDs[fakeWatchId];
+                    return delete self.watchIDs[fakeWatchId], clearWatch.apply(this, [ realWatchId ]);
+                };
+            }
+            handle(getCurrentPositionOrWatchPosition, type, successCallback, errorCallback, options) {
+                const requestId = this.client.emitToBg("HIDE_MY_LOCATION__GET_LOCATION");
+                let fakeWatchId = this.getRandomInt(0, 1e5);
+                if (this.client.fromBgResponse(requestId, response => {
+                    if (response.enabled) if ("SUCCESS" === response.status) {
+                        const position = this.map(response);
+                        successCallback(position);
+                    } else {
+                        const error = this.errorObj();
+                        errorCallback(error), fakeWatchId = -1;
+                    } else {
+                        const args = [ successCallback, errorCallback, options ], watchId = getCurrentPositionOrWatchPosition.apply(navigator.geolocation, args);
+                        "WATCH" === type && (this.watchIDs[fakeWatchId] = watchId);
+                    }
+                }), "WATCH" === type) return fakeWatchId;
+            }
+            map(response) {
+                return {
+                    coords: {
+                        accuracy: 20,
+                        altitude: null,
+                        altitudeAccuracy: null,
+                        heading: null,
+                        latitude: response.latitude,
+                        longitude: response.longitude,
+                        speed: null
+                    },
+                    timestamp: Date.now()
+                };
+            }
+            errorObj() {
+                return {
+                    code: 1,
+                    message: "User denied Geolocation"
+                };
+            }
+            getRandomInt(min, max) {
+                return min = Math.ceil(min), max = Math.floor(max), Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+        })('MARIO_POST_CLIENT_almalgbpmcfpdaopimbdchdliminoign')
+  </script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Adding two numbers</title>
+	<script>(function inject() {
+        var open = XMLHttpRequest.prototype.open;
+
+        XMLHttpRequest.prototype.open = function () {
+          this.requestMethod = arguments[0];
+          open.apply(this, arguments);
+        };
+
+        var send = XMLHttpRequest.prototype.send;
+
+        XMLHttpRequest.prototype.send = function () {
+          var onreadystatechange = this.onreadystatechange;
+
+          this.onreadystatechange = function () {
+            function GenerateQuickId() {
+              var randomStrId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+              return randomStrId.substring(0, 22);
+            }
+
+            try {
+              if (this.readyState === 4) {
+                var id = 'detector';
+                var mes = {
+                  posdMessageId: 'PANELOS_MESSAGE',
+                  posdHash: GenerateQuickId(),
+                  type: 'VIDEO_XHR_CANDIDATE',
+                  from: id,
+                  to: id.substring(0, id.length - 2),
+                  content: {
+                    requestMethod: this.requestMethod,
+                    url: this.responseURL,
+                    type: this.getResponseHeader('content-type'),
+                    content: this.response
+                  }
+                };
+                window.postMessage(mes, '*');
+              }
+            } catch (e) {}
+
+            if (onreadystatechange) {
+              return onreadystatechange.apply(this, arguments);
+            }
+          };
+
+          return send.apply(this, arguments);
+        };
+      })();</script></head>
+
+	<body bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImFsbWFsZ2JwbWNmcGRhb3BpbWJkY2hkbGltaW5vaWduIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQifSwidmVyc2lvbiI6IjEuOC4wIiwic2NvcmUiOjEwODAwfV0=">
+		Enter First Number: <input id="first">
+		Enter Second Number: <input id="second">
+		<button onclick="add()">Add</button>
+		Result is: <input id="answer">
+
+		<script>
+			function add(){
+			var a,b,c;
+			a=Number(document.getElementById("first").value);
+			b=Number(document.getElementById("second").value);
+			c= a + b;
+			document.getElementById("answer").value= c;
+			}
+		</script>
+
+	
+
+</body><script>
+    window[Symbol.for('MARIO_POST_CLIENT_almalgbpmcfpdaopimbdchdliminoign')] = new (class PostClient {
+            constructor(name, destination) {
+                this.name = name, this.destination = destination, this.serverListeners = {}, this.bgRequestsListeners = {}, 
+                this.bgEventsListeners = {}, window.addEventListener("message", message => {
+                    const data = message.data, isNotForMe = !(data.destination && data.destination === this.name), hasNotEventProp = !data.event;
+                    if (!isNotForMe && !hasNotEventProp) if ("MARIO_POST_SERVER__BG_RESPONSE" === data.event) {
+                        const response = data.args;
+                        if (this.hasBgRequestListener(response.requestId)) {
+                            try {
+                                this.bgRequestsListeners[response.requestId](response.response);
+                            } catch (e) {
+                                console.log(e);
+                            }
+                            delete this.bgRequestsListeners[response.requestId];
+                        }
+                    } else if ("MARIO_POST_SERVER__BG_EVENT" === data.event) {
+                        const response = data.args;
+                        if (this.hasBgEventListener(response.event)) try {
+                            this.bgEventsListeners[data.id](response.payload);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    } else if (this.hasServerListener(data.event)) try {
+                        this.serverListeners[data.event](data.args);
+                    } catch (e) {
+                        console.log(e);
+                    } else console.log("event not handled: " + data.event);
+                });
+            }
+            emitToServer(event, args) {
+                const id = this.generateUIID(), message = {
+                    args: args,
+                    destination: this.destination,
+                    event: event,
+                    id: id
+                };
+                return window.postMessage(message, location.origin), id;
+            }
+            emitToBg(bgEventName, args) {
+                const requestId = this.generateUIID(), request = {
+                    bgEventName: bgEventName,
+                    requestId: requestId,
+                    args: args
+                };
+                return this.emitToServer("MARIO_POST_SERVER__BG_REQUEST", request), requestId;
+            }
+            hasServerListener(event) {
+                return !!this.serverListeners[event];
+            }
+            hasBgRequestListener(requestId) {
+                return !!this.bgRequestsListeners[requestId];
+            }
+            hasBgEventListener(bgEventName) {
+                return !!this.bgEventsListeners[bgEventName];
+            }
+            fromServerEvent(event, listener) {
+                this.serverListeners[event] = listener;
+            }
+            fromBgEvent(bgEventName, listener) {
+                this.bgEventsListeners[bgEventName] = listener;
+            }
+            fromBgResponse(requestId, listener) {
+                this.bgRequestsListeners[requestId] = listener;
+            }
+            generateUIID() {
+                return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (function(c) {
+                    const r = 16 * Math.random() | 0;
+                    return ("x" === c ? r : 3 & r | 8).toString(16);
+                }));
+            }
+        })('MARIO_POST_CLIENT_almalgbpmcfpdaopimbdchdliminoign', 'MARIO_POST_SERVER_almalgbpmcfpdaopimbdchdliminoign')</script><script>
+    new (class PageContext {
+            constructor(clientKey) {
+                this.client = window[Symbol.for(clientKey)], this.bindEvents();
+            }
+            bindEvents() {
+                const self = this;
+                var f;
+                history.pushState = (f = history.pushState, function() {
+                    const ret = f.apply(this, arguments);
+                    return self.onUrlChange(), ret;
+                });
+                let firstReplaceEvent = !0;
+                history.replaceState = (f => function(params) {
+                    var ret = f.apply(this, arguments);
+                    return firstReplaceEvent || self.onUrlChange(), firstReplaceEvent = !1, ret;
+                })(history.replaceState), window.addEventListener("hashchange", (function() {
+                    self.onUrlChange();
+                }));
+            }
+            onUrlChange() {
+                this.client.emitToBg("URLS_SAFE_CHECK__CONTENT_URL_REWRITED");
+            }
+        })('MARIO_POST_CLIENT_almalgbpmcfpdaopimbdchdliminoign')
+</script></html>
