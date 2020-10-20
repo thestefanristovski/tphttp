@@ -21,6 +21,7 @@ public class WebServer {
 
     /**
      * WebServer constructor.
+     * @param port the port on which the server will start up
      */
     protected void start(int port) {
         ServerSocket s;
